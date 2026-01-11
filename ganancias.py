@@ -31,16 +31,12 @@ def calcular_ganancias():
     print("-" * 65)
 
     for ticker, cant, inv_clp, inv_usd, inv_uf in mis_activos:
-        # 2. Obtenemos precio actual del mercado
-        # Ojo: yfinance entrega USD, hay que multiplicarlo por el dólar actual 
-        # o usar el precio en CLP si tuvieras un ticker local
+
         data = yf.Ticker(ticker)
         precio_actual_usd = data.fast_info['last_price']
         
-        # Necesitamos el dólar actual para comparar peras con peras
-        
-        
-        # 3. Cálculos
+
+
         ppa_usd = inv_usd / cant
         valor_actual_posicion_usd = cant * precio_actual_usd
         ganancia_usd = valor_actual_posicion_usd - inv_usd
@@ -64,5 +60,5 @@ def calcular_ganancias():
         
     conn.close()
 
-# Ejecutar
+
 calcular_ganancias()
