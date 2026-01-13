@@ -27,7 +27,7 @@ def calcular_ganancias():
     dolar = conversiones.get_usd()
     uf = conversiones.get_uf()
 
-    #print(f"{'TICKER':<10} | {'CANT':<7} | {'PPC CLP':<12} | {'ACTUAL CLP':<12} | {'GANANCIA %':<10}")
+    print(f"{'TICKER':<10} | {'CANT':<7} | {'PPA ':<15} | {'VALOR ACTUAL':<15} | {'DIFERENCIA %':<10}")
     print("-" * 65)
 
     for ticker, cant, inv_clp, inv_usd, inv_uf in mis_activos:
@@ -54,9 +54,9 @@ def calcular_ganancias():
         ganancia_uf = ganancia_clp / uf
         porcentaje_uf = (ganancia_uf / inv_uf) * 100
         
-        print(f"{ticker:<10} | {cant:<7.0f} | {ppa_clp:>12,.0f} | {precio_actual_clp:>12,.0f} | {porcentaje_clp:>9.2f}%")
-        #print(f"{ticker:<10} | {cant:<7.0f} | {ppa_uf:>12,.2f} | {precio_actual_uf:>12,.2f} | {porcentaje_uf:>9.2f}%")
-        #print(f"{ticker:<10} | {cant:<7.0f} | {ppa_usd:>12,.2f} | {precio_actual_usd:>12,.2f} | {porcentaje_usd:>9.2f}%")
+        print(f"{ticker:<10} | {cant:<7.0f} | CLP {ppa_clp:>12,.0f} | CLP {precio_actual_clp:>12,.0f} | {porcentaje_clp:>9.2f}%")
+        print(f"{ticker:<10} | {cant:<7.0f} | USD {ppa_uf:>12,.2f} | USD {precio_actual_uf:>12,.2f} | {porcentaje_uf:>9.2f}%")
+        print(f"{ticker:<10} | {cant:<7.0f} | UF {ppa_usd:>13,.2f} | UF {precio_actual_usd:>13,.2f} | {porcentaje_usd:>9.2f}%")
         
     conn.close()
 
