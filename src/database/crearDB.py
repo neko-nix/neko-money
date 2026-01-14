@@ -1,7 +1,8 @@
 import sqlite3
+from src.utils.paths import DB_PATH
 
 def inicializar_db():
-    conn = sqlite3.connect('nekoMoney.db')
+    conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
 
     cursor.execute("""

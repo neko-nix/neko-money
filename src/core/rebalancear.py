@@ -3,7 +3,8 @@
 
 import sqlite3
 import yfinance as yf
-import conversiones
+from src.utils import conversiones
+from src.utils.paths import DB_PATH
 
 
 # Estrategia
@@ -26,7 +27,7 @@ for i, (ticker, prop) in enumerate(tickersINT):
 
     
 def calcular_proporciones():
-    conn = sqlite3.connect('nekoMoney.db')
+    conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     
     cursor.execute("""

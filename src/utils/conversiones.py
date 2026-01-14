@@ -2,12 +2,11 @@ import yfinance as yf
 import requests
 from datetime import datetime, date, timedelta
 import sqlite3
-
-pathDB = "nekoMoney.db"
+from src.utils.paths import DB_PATH
 
 
 def get_db_value(indicador):
-    conn = sqlite3.connect(pathDB)
+    conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     cursor.execute("SELECT valor, last_update FROM cache_indicadores WHERE indicador = ?", (indicador,))
     res = cursor.fetchone()
@@ -15,7 +14,7 @@ def get_db_value(indicador):
     return res
 
 def save_db_value(indicador, valor):
-    conn = sqlite3.connect(pathDB)
+    conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     cursor.execute("""
         INSERT OR REPLACE INTO cache_indicadores (indicador, valor, last_update) 

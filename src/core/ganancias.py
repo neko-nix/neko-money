@@ -1,9 +1,10 @@
 import sqlite3
 import yfinance as yf
-import conversiones
+from src.utils import conversiones
+from src.utils.paths import DB_PATH
 
 def calcular_ganancias():
-    conn = sqlite3.connect('nekoMoney.db')
+    conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     
     cursor.execute("""
@@ -53,10 +54,11 @@ def calcular_ganancias():
         valor_actual_posicion_uf = valor_actual_posicion_clp / uf
         ganancia_uf = ganancia_clp / uf
         porcentaje_uf = (ganancia_uf / inv_uf) * 100
-        
+
+
         print(f"{ticker:<10} | {cant:<7.0f} | CLP {ppa_clp:>12,.0f} | CLP {precio_actual_clp:>12,.0f} | {porcentaje_clp:>9.2f}%")
-        print(f"{ticker:<10} | {cant:<7.0f} | USD {ppa_uf:>12,.2f} | USD {precio_actual_uf:>12,.2f} | {porcentaje_uf:>9.2f}%")
-        print(f"{ticker:<10} | {cant:<7.0f} | UF {ppa_usd:>13,.2f} | UF {precio_actual_usd:>13,.2f} | {porcentaje_usd:>9.2f}%")
+        #print(f"{ticker:<10} | {cant:<7.0f} | USD {ppa_uf:>12,.2f} | USD {precio_actual_uf:>12,.2f} | {porcentaje_uf:>9.2f}%")
+        #print(f"{ticker:<10} | {cant:<7.0f} | UF {ppa_usd:>13,.2f} | UF {precio_actual_usd:>13,.2f} | {porcentaje_usd:>9.2f}%")
         
     conn.close()
 

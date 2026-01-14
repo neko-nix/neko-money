@@ -2,6 +2,8 @@ Sistema personal de seguimiento de inversiones en ETFs automático, utilizando l
 
 # Tareas Completas
 - [x] Script para calcular las proporciones objetivo y las actuales. [rebalancear](/rebalancear.py).
+- [x] Se reordena la estructura del proyecto para que esté más ordenado.
+- [x] Se agrega [paths.py](/src/utils/paths.py) para obtener dinámicamente el path de la base de datos, independientemente desde donde se ejecute el script.
 
 Todos los cambios se encuentran en [CHANGELOG](/CHANGELOG.md)
 
@@ -19,8 +21,6 @@ Para activar el entorno de desarrollo, descargando e instalando todas sus depend
 ```sh
 nix develop
 ```
-
-
 
 # Licencia
 Este proyecto está bajo la Licencia MIT. Consulta el archivo [LICENSE](LICENSE) para más detalles.
