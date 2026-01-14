@@ -25,10 +25,14 @@
               pandas numpy matplotlib
               jupyterlab yfinance plotly
               requests
+              pytest
             ]))
           ];
           shellHook = ''
                       echo "Entorno de desarrolo activado :D"
+
+                      # Borrar los caches de python
+                      find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null
           '';        
         };
       });

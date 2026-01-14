@@ -4,6 +4,7 @@ import sqlite3
 from datetime import datetime
 import yfinance as yf
 import requests
+from src.utils.paths import DB_PATH
 
 
 def leer_dato(prompt, tipo_esperado=float, opciones=None, sugerencia=None):
@@ -23,7 +24,7 @@ def leer_dato(prompt, tipo_esperado=float, opciones=None, sugerencia=None):
 
         try:
             valor = tipo_esperado(entrada.replace(",", "."))
-            if valor <= 0:
+            if valor < 0:
                 print("El valor debe ser mayor a 0")
                 continue
             return valor
@@ -35,7 +36,6 @@ def leer_dato(prompt, tipo_esperado=float, opciones=None, sugerencia=None):
 
 TICKERS_VALIDOS = ["ITOT", "IUSV", "IJR", "IXUS", "SCZ"]
 OPCIONES_VALIDAS = ["COMPRA", "VENTA"]
-nombreDB = "nekoMoney.db"
 
 
 ticker   = leer_dato(f"Ticker ({', '.join(TICKERS_VALIDOS)}): ", opciones=TICKERS_VALIDOS)
@@ -125,7 +125,7 @@ confirmar = input("\n¿Guardar este movimiento en la base de datos? (s/n): ").lo
 
 if confirmar == 's':
     try:
-        conn = sqlite3.connect('nekoMoney.db')
+        conn = sqlite3.connect(DB_PATH)
         cursor = conn.cursor()
 
         query = """
