@@ -1,16 +1,11 @@
 Sistema personal de seguimiento de inversiones en ETFs automático, utilizando las APIs de [Yahoo Finance](https://ranaroussi.github.io/yfinance/index.html), [Mindicador.cl](https://mindicador.cl/) y SQLite, optimizado para el mercado chileno y desarrollado sobre NixOS.
 
 # Tareas Completas
-- [x] Crear ambiente de desarrollo con [flake.nix](flake.nix) en NixOS.
-- [x] Validación de datos de entrada (Tickers, tipos de cambio y precios).
-- [x] Automatización de tipo de cambio USD/CLP y UF vía API.
-- [x] Cálculo automático de equivalencias en CLP, USD y UF.
-- [x] Agregar los datos obtenidos en [registrarMovimiento.py](/datos/registrarMovimiento.py) a la base de datos [nekoMoney.db](/datos/nekoMoney.db).
+- [x] Script para calcular las proporciones objetivo y las actuales. [rebalancear](/rebalancear.py).
 
 Todos los cambios se encuentran en [CHANGELOG](/CHANGELOG.md)
 
 # Pendientes
-- [ ] Definir estrategia de inversión.
 - [ ] Script que sea capaz de obtener las proporciones del mercado estadounidense comparado con el resto de mundo basándose en el indicador MSCI ACWI.
 - [ ] Crear script que indice el rebalanceo de los ETFs según la estrategia de inversión y las cantidades actuales.
 - [ ] Obtener los valores actuales de los ETFs, y calcular ganancias en CLP, USD y UF.

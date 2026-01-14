@@ -1,3 +1,6 @@
+# 2026-01-13
+- [x] Script para calcular las proporciones objetivo y las actuales. [rebalancear](/rebalancear.py).
+
 # 2026-01-11
 - [x] Crear ambiente de desarrollo con [flake.nix](flake.nix) en NixOS.
 - [x] Validación de datos de entrada (Tickers, tipos de cambio y precios).
