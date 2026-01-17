@@ -60,15 +60,24 @@ def calcular_proporciones():
 
     conn.close()
 
-    suma = 0
+    sumaFinal = 0
+    sumaInicial = 0
+    gananciaTotal = 0
     for activos in totales:
-        suma = activos[3] + suma
+        sumaFinal = activos[3] + sumaFinal
+        sumaInicial = activos[2] + sumaInicial
     
-    print(f"El total invertido es CLP {suma:.0f}")
+    gananciaTotal = (sumaFinal - sumaInicial) / sumaInicial
 
+    print("")
+    print(f"El valor invertido inicial es CLP {sumaInicial:.0f}")
+    print(f"El valor actual de la cartera es CLP {sumaFinal:.0f}")
+    print(f"La cartera ha variado en CLP {sumaFinal-sumaInicial:.0f} ({gananciaTotal*100:.2f}%)")
+
+    print("")
     print("Las proporciones actuales son:")
     for activos in totales:
-        propoActual = activos[3]/suma
+        propoActual = activos[3]/sumaFinal
         print(f"{activos[0]} es {propoActual*100:.2f}%")
 
 
