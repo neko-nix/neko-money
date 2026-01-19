@@ -23,7 +23,7 @@
             python312
             (python312.withPackages (ps: with ps; [
               pandas numpy matplotlib
-              jupyterlab yfinance plotly
+              yfinance plotly
               requests
               pytest
             ]))

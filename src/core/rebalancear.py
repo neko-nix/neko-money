@@ -4,13 +4,17 @@
 import sqlite3
 import yfinance as yf
 from src.utils import conversiones
-from src.utils.paths import DB_PATH
+from src.utils.paths import DB_PATH, DATA_DIR
+import pandas as pd
 
 
-# Estrategia
-# Idealmente después esto será automático.
+holdingsACWI = DATA_DIR+"datosACWI.csv"
+print(holdingsACWI)
 
-proporcionUSA = 0.64
+df = pd.read_csv(holdingsACWI, skiprows=9)
+
+
+proporcionUSA = (df[df['Location'] == 'United States']['Weight (%)'].sum()/100)
 proporcionINT = 1-proporcionUSA
 
 tickersUSA = [["ITOT", 1/3],["IUSV",1/3],["IJR",1/3]]
