@@ -9,7 +9,6 @@ import pandas as pd
 
 
 holdingsACWI = DATA_DIR+"datosACWI.csv"
-print(holdingsACWI)
 
 df = pd.read_csv(holdingsACWI, skiprows=9)
 
@@ -20,14 +19,19 @@ proporcionINT = 1-proporcionUSA
 tickersUSA = [["ITOT", 1/3],["IUSV",1/3],["IJR",1/3]]
 tickersINT = [["IXUS", 4/5], ["SCZ",1/5]]
 
+propDict = {}
+
 print("Las proporciones objetivo son las siguientes:")
 for i, (ticker, prop) in enumerate(tickersUSA):
     tickersUSA[i][1] = prop*proporcionUSA
     print(f"{ticker} {tickersUSA[i][1]*100:.2f}%")
+    propDict[ticker] = tickersUSA[i][1]
+
 
 for i, (ticker, prop) in enumerate(tickersINT):
     tickersINT[i][1] = prop*proporcionINT
     print(f"{ticker} {tickersINT[i][1]*100:.2f}%")
+    propDict[ticker] = tickersINT[i][1]
 
     
 def calcular_proporciones():
@@ -64,6 +68,11 @@ def calcular_proporciones():
 
     conn.close()
 
+    # Esta es la inversión mínima que define el broker para tener las comisiones más favorables
+    # Esto puede variar con el tiempo, así que hay que estar atento a los cambios que se hagan.
+    invMinima = (0.12*1.19*conversiones.get_uf()/(0.595/100))
+    print(f"\nInversión mínima para obtener las comisiones más favorables: {invMinima:.0f}")
+
     sumaFinal = 0
     sumaInicial = 0
     gananciaTotal = 0
@@ -80,9 +89,17 @@ def calcular_proporciones():
 
     print("")
     print("Las proporciones actuales son:")
+
+    nuevaSuma = 0
     for activos in totales:
         propoActual = activos[3]/sumaFinal
-        print(f"{activos[0]} es {propoActual*100:.2f}%")
+        nuevaSuma += activos[3]
+
+        if propoActual > propDict[activos[0]]:
+            print(f"{activos[0]} es {propoActual*100:.2f}% (Sobreponderado)")
+
+        else:
+            print(f"{activos[0]} es {propoActual*100:.2f}% (Bajoponderado)")
 
 
 calcular_proporciones()
