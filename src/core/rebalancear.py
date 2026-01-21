@@ -76,9 +76,9 @@ def calcular_proporciones():
     sumaFinal = 0
     sumaInicial = 0
     gananciaTotal = 0
-    for activos in totales:
-        sumaFinal = activos[3] + sumaFinal
-        sumaInicial = activos[2] + sumaInicial
+    for ticker, cantidad, invInicial, invActual in totales:
+        sumaFinal = invActual + sumaFinal
+        sumaInicial = invInicial + sumaInicial
     
     gananciaTotal = (sumaFinal - sumaInicial) / sumaInicial
 
@@ -88,18 +88,43 @@ def calcular_proporciones():
     print(f"La cartera ha variado en CLP {sumaFinal-sumaInicial:.0f} ({gananciaTotal*100:.2f}%)")
 
     print("")
-    print("Las proporciones actuales son:")
+    #print("Las proporciones actuales son:")
 
+    # Suma de lo que se agrega
     nuevaSuma = 0
-    for activos in totales:
-        propoActual = activos[3]/sumaFinal
-        nuevaSuma += activos[3]
 
-        if propoActual > propDict[activos[0]]:
-            print(f"{activos[0]} es {propoActual*100:.2f}% (Sobreponderado)")
+    # Para probar otros montos:
+    invMinima = 1.5e6
+    print(f"Se van a inyectar ${invMinima:.0f}\n")
+
+
+    for ticker, cantidad, invInicial, invActual in totales:
+        propoActual = invInicial/sumaFinal       
+
+        print(f"{ticker} tiene ${invActual:.0f}, y su proporción actual es {propoActual*100:.2f}%")
+
+        totalNuevo = sumaFinal + invMinima
+
+        invIdeal = propDict[ticker]* totalNuevo
+        diferencia = invIdeal - invActual
+
+        if diferencia > 0:
+            nuevaSuma += diferencia
+
+            print(f"A {ticker} se deben agregar ${diferencia:.0f} para alcanzar su proporción ideal ({propDict[ticker]*100:.2f}%)")
+            print(f"{ticker} ahora tiene ${invActual+diferencia:.0f} (Actual: ${invActual:.0f} + Agregar: ${diferencia:.0f})\n")
 
         else:
-            print(f"{activos[0]} es {propoActual*100:.2f}% (Bajoponderado)")
+            print(f"A {ticker} no hay que agregarle nada, porque está sobreponderado.")
+            print(f"{ticker} se queda en ${invActual:.0f}\n")
+
+    
+
+    sobraron = invMinima-nuevaSuma
+    print(f"Sobraron ${sobraron:.0f}")
+
+    print("\nNOTA: Aunque un ticker esté sobreponderado, se calcula lo que se debe inyectar considerando TODOS LO QUE SE SUME A LOS OTROS TICKERS.")
+
 
 
 calcular_proporciones()
