@@ -9,32 +9,28 @@ import pandas as pd
 
 
 holdingsACWI = DATA_DIR+"datosACWI.csv"
-
 df = pd.read_csv(holdingsACWI, skiprows=9)
 
-
 proporcionUSA = (df[df['Location'] == 'United States']['Weight (%)'].sum()/100)
-proporcionINT = 1-proporcionUSA
 
-tickersUSA = [["ITOT", 1/3],["IUSV",1/3],["IJR",1/3]]
-tickersINT = [["IXUS", 4/5], ["SCZ",1/5]]
-
-propDict = {}
+proporcionesTickers = {
+    # Sector USA
+    "ITOT": proporcionUSA/3,
+    "IUSV": proporcionUSA/3,
+    "IJR": proporcionUSA/3,
+    # Sector Internacional
+    "IXUS": 1-proporcionUSA,
+    "SCZ": 0
+}
 
 print("Las proporciones objetivo son las siguientes:")
 
-print(f"\n{'Ticker':<6} | {'Proporción':<10}")
-print("=" * 19)
-
-for i, (ticker, prop) in enumerate(tickersUSA):
-    tickersUSA[i][1] = prop*proporcionUSA
-    propDict[ticker] = tickersUSA[i][1]
-    print(f"{ticker:<6} | {tickersUSA[i][1]*100:>8.2f} %")
-
-for i, (ticker, prop) in enumerate(tickersINT):
-    tickersINT[i][1] = prop*proporcionINT
-    propDict[ticker] = tickersINT[i][1]
-    print(f"{ticker:<6} | {tickersINT[i][1]*100:>8.2f} %")
+print(f"{'TICKER':<6} | {'PROP'}")
+print("=" * 17)
+for ticker, proporcion in proporcionesTickers.items():
+    print(f"{ticker:<6} | {proporcion*100:>6.2f} %")
+#tickersUSA = [["ITOT", 1/3],["IUSV",1/3],["IJR",1/3]]
+#tickersINT = [["IXUS", propIXUS], ["IVLU",propIVLU], ["ISVL", propISVL], ["EVLU", propEVLU ]]
 
 
 
@@ -75,12 +71,9 @@ def calcular_proporciones():
 
     conn.close()
 
-
-
     sumaFinal = 0
     sumaInicial = 0
     gananciaTotal = 0
-
 
     print(f"\n{'Ticker':<6} | {'Inv Inicial':<13} | {'Inv Final':<13} | {'Variación':<9}")
     print("=" * 54)
@@ -104,10 +97,13 @@ def calcular_proporciones():
     print("")
     #print("Las proporciones actuales son:")
 
+    # REBALANCEO
+
     # Suma de lo que se agrega
     nuevaSuma = 0
     sumaSobrante = 0
     residuoCompra = []
+    comprasTickers = []
 
     # Esta es la inversión mínima que define el broker para tener las comisiones más favorables
     # Esto puede variar con el tiempo, así que hay que estar atento a los cambios que se hagan.
@@ -121,47 +117,97 @@ def calcular_proporciones():
 
 
 
-    print(f"{'Ticker':<6} | {'Inv Actual':<13} | {'Prop Actual':<11} | {'Agregar':<12} | {'Precio Unitario':<15} | {'Comprar':>7} | {'Sobrante':>10}")
-    print("=" * 100)
+    #print(f"{'Ticker':<6} | {'Inv Actual':<13} | {'Prop Actual':<11} | {'Agregar':<12} | {'Precio Unitario':<15} | {'Comprar':>7} | {'Sobrante':>10}")
+    #print("=" * 100)
 
     for ticker, cantidad, invInicial, invActual, pua in totales:
-        propoActual = invInicial/sumaFinal       
+        if ticker != "SCZ":
+            propoActual = invInicial/sumaFinal       
 
-        #print(f"{ticker} tiene ${invActual:,.0f}, y su proporción actual es {propoActual*100:.2f}%")
+            #print(f"{ticker} tiene ${invActual:,.0f}, y su proporción actual es {propoActual*100:.2f}%")
 
-        totalNuevo = sumaFinal + cantidadInyectar
+            totalNuevo = sumaFinal + cantidadInyectar
 
-        invIdeal = propDict[ticker]* totalNuevo
-        diferencia = invIdeal - invActual
+            invIdeal = proporcionesTickers[ticker]* totalNuevo
+            diferencia = invIdeal - invActual
 
-        if diferencia > 0:
-            nuevaSuma += diferencia
-            comision = max((diferencia*0.595)/100, 0.12*1.19*conversiones.get_uf())
-            spreadBroker = (diferencia*0.6)/100
+            if diferencia > 0:
+                nuevaSuma += diferencia
 
-            cantidadComprar = (diferencia-comision-spreadBroker) / pua
+                
+                spreadBroker = (pua*0.6)/100
 
-            fraccionAccion = cantidadComprar - int(cantidadComprar)
-            dineroSobrante = fraccionAccion * pua
-            sumaSobrante += dineroSobrante
+                cantidadComprarEstimada = (diferencia) / (pua+spreadBroker)
+                montoCompraEstimado = int(cantidadComprarEstimada) * (pua+spreadBroker)
 
-            #residuoCompra.append([ticker,fraccionAccion])
+                comisionVariable = (montoCompraEstimado*0.595)/100
 
-            print(f"{ticker:<6} | $ {invActual:>11,.0f} | {propoActual*100:>9.2f} % | $ {diferencia:>10,.0f} | $ {pua:>13,.0f} | {cantidadComprar:>7.0f} | $ {dineroSobrante:>8,.0f}")
-            #print(f"A {ticker} se deben agregar ${diferencia:,.0f} para alcanzar su proporción ideal ({propDict[ticker]*100:.2f}%)")
-            #print(f"{ticker} ahora tiene ${invActual+diferencia:,.0f} (Actual: ${invActual:,.0f} + Agregar: ${diferencia:,.0f})\n")
+                comision = max(comisionVariable, 0.12*1.19*conversiones.get_uf())
 
-        else:
-            print(f"{ticker:<6} | $ {invActual:>11,.0f} | {propoActual*100:>9.2f} % | $ {0:>10,.0f}")
-            #print(f"A {ticker} no hay que agregarle nada, porque está sobreponderado.")
-            #print(f"{ticker} se queda en ${invActual:,.0f}\n")
+                cantidadComprar = (diferencia - comision) / (pua+spreadBroker)
+                fraccionAccion = cantidadComprar - int(cantidadComprar)
+
+                if cantidadComprar < 1:                
+                    dineroSobrante = diferencia
+                    cantidadComprar = 0
+                else:                
+                    dineroSobrante = fraccionAccion * (pua+spreadBroker)            
+
+                sumaSobrante += dineroSobrante
+
+                #residuoCompra.append([ticker,fraccionAccion])
+
+                
+
+                #print(f"{ticker:<6} | $ {invActual:>11,.0f} | {propoActual*100:>9.2f} % | $ {diferencia:>10,.0f} | $ {pua:>13,.0f} | {int(cantidadComprar):>7.0f} | $ {dineroSobrante:>8,.0f}")
+                #print(f"A {ticker} se deben agregar ${diferencia:,.0f} para alcanzar su proporción ideal ({propDict[ticker]*100:.2f}%)")
+                #print(f"{ticker} ahora tiene ${invActual+diferencia:,.0f} (Actual: ${invActual:,.0f} + Agregar: ${diferencia:,.0f})\n")
+
+            else:
+                cantidadComprar = 0
+                fraccionAccion = 0
+                comprasTickers.append([ticker, int(cantidadComprar), fraccionAccion])
+                #print(f"{ticker:<6} | $ {invActual:>11,.0f} | {propoActual*100:>9.2f} % | $ {0:>10,.0f}")
+                #print(f"A {ticker} no hay que agregarle nada, porque está sobreponderado.")
+                #print(f"{ticker} se queda en ${invActual:,.0f}\n")
+
+            comprasTickers.append([ticker, cantidad, invInicial, invActual, pua, int(cantidadComprar), dineroSobrante, fraccionAccion, propoActual, diferencia])
 
     
     sobraron = invMinima-nuevaSuma+sumaSobrante
 
-
     print(f"\nSobraron en total: ${sobraron:,.0f}")
     #print(f"Sobró por discretización ${sumaSobrante:,.0f}")
+
+    comprasTickers.sort(key=lambda x: x[7], reverse=True)    
+
+    print(f"{'Ticker':<6} | {'Inv Actual':<13} | {'Prop Actual':<11} | {'Agregar':<12} | {'Precio Unitario':<15} | {'Comprar':>7}")
+    print("=" * 100)
+
+    for ticker, cantidad, invInicial, invActual, pua, cantidadComprar, dineroSobrante, fraccionAccion, propoActual, diferencia in comprasTickers:
+        # Sólo se consideran los tickers que sí se iban a comprar, esto para evitar gastar más en comprar 1 sólo ticker
+        # y pagando comisiones extra
+        cantidadComprarExtra = 0
+        if int(cantidadComprar) > 0:
+            spreadBroker = (pua*0.6)/100
+
+            # Para este cálculo sólo se considera comisión variable, porque se va a hacer una sóla compra del ticker
+            # Y si la comisión fija ya se pagó antes, entonces sólo se paga la variable
+            if sobraron >= (pua+spreadBroker):
+                cantidadComprarEstimada = sobraron/(pua+spreadBroker)
+                montoCompraEstimado = int(cantidadComprarEstimada) * (pua+spreadBroker)
+                comisionVariable = (montoCompraEstimado*0.595)/100
+                cantidadComprarExtra = (sobraron-comisionVariable) / (pua+spreadBroker)
+
+                sobraron -= ((cantidadComprarExtra-int(cantidadComprarExtra))*(pua+spreadBroker))
+
+                #print(f"Se van a comprar {int(cantidadComprarExtra)} de {ticker}, para un total de {cantidadComprar+cantidadComprarExtra}")
+        
+        print(f"{ticker:<6} | $ {invActual:>11,.0f} | {propoActual*100:>9.2f} % | $ {diferencia:>10,.0f} | $ {pua:>13,.0f} | {int(cantidadComprar)+int(cantidadComprarExtra):>7.0f}")
+
+
+    
+    print(f"\nSobró ${sobraron:.0f}")
 
     print("\nNOTA: Aunque un ticker esté sobreponderado, se calcula lo que se debe inyectar considerando TODOS LO QUE SE SUME A LOS OTROS TICKERS.")
 
