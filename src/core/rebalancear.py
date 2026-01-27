@@ -138,7 +138,7 @@ def calcular_proporciones():
             nuevaSuma += diferencia
 
             
-            spreadBroker = (pua*0.6)/100
+            spreadBroker = (pua*1.5)/100
 
             cantidadComprarEstimada = (diferencia) / (pua+spreadBroker)
             montoCompraEstimado = int(cantidadComprarEstimada) * (pua+spreadBroker)
@@ -195,7 +195,7 @@ def calcular_proporciones():
     for i in range(len(comprasTickers)):
         if comprasTickers[i][5] > 0:
             pua = comprasTickers[i][4]
-            spread = (pua * 0.6) / 100
+            spread = (pua * 1.5) / 100
             costo_unidad = pua + spread
 
             # Para este cálculo sólo se considera comisión variable, porque se va a hacer una sóla compra del ticker
