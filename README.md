@@ -2,7 +2,7 @@
 ![Python](https://img.shields.io/badge/python-3.12+-orange?logo=python&logoColor=white) 
 ![NixOS](https://img.shields.io/badge/NixOS-blue?logo=nixos&logoColor=white&color=5277C3)
 ![SQLite](https://img.shields.io/badge/sqlite-%2307405e.svg?logo=sqlite&logoColor=white)
-![Version](https://img.shields.io/badge/version-0.1--alpha-blue)
+![Version](https://img.shields.io/badge/version-1.0-brightgreen)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Last Commit](https://img.shields.io/github/last-commit/neko-nix/neko-money)
 ![GitHub commit activity](https://img.shields.io/github/commit-activity/m/neko-nix/neko-money)
@@ -14,9 +14,9 @@ Sistema personal de seguimiento de inversiones en ETFs automático, utilizando l
 - **Gestión de Movimientos:** Registro en SQLite de compras, ventas y comisiones de cada transacción en CLP, y cálculo automático de equivalentes en USD y UF.
 - **Valor Actual de Inversión:** Cálculo de ganancias/pérdidas del portafolio invertido a la fecha actual.
 - **Entorno Nix:** Ambiente de desarrollo reproducible mediante [flake.nix](/flake.nix) sin tener que depender de documentos tipo `requierements.txt`.
+- **[Rebalanceo de Activos (PR #1)](https://github.com/neko-nix/neko-money/pull/1):** Lógica de flujo de caja basada en el índice MSCI ACWI.
 
 ## Roadmap (Próximos Pasos)
-- **[Rebalanceo de Activos (PR #1)](https://github.com/neko-nix/neko-money/pull/1):** Lógica de flujo de caja basada en el índice MSCI ACWI.
 - **[Documentación de Estrategia de Inversión (Issue #3)](https://github.com/neko-nix/neko-money/issues/3)**: Documentar y explicar la estrategia de inversión.
 - **Análisis Visual:** Generar gráficos de distintos tipos para analizar visualmente el comportamiento del portafolio.
 - **Análisis de Componentes:** Scrapping de los componentes internos de cada ETF, y generar un análisis detallado de las posiciones, geografía, industrias, etc, del portafolio.
@@ -24,7 +24,6 @@ Sistema personal de seguimiento de inversiones en ETFs automático, utilizando l
 - **Históricos:** Guardar datos históricos del portafolio, para poder hacer análisis en el tiempo.
 - **Proyecciones:** Implementar distintos tipos de proyecciones para el portafolio.
 - **Comparaciones:** Comparar los resultados del portafolio con otros utilizados comúnmente, y ver sus diferencias.
-
 
 Todos los cambios se encuentran en [CHANGELOG](/CHANGELOG.md)
 
@@ -49,6 +48,7 @@ nix develop
 │   │   └── crearDB.py
 │   └── utils                       # Herramientas y rutas dinámicas
 │       ├── conversiones.py
+│       ├── etfData.py
 │       └── paths.py
 ├── tests                           # Validación de cálculos
 └── flake.nix                       # Entorno NixOS reproducible
