@@ -26,6 +26,7 @@
               yfinance plotly
               requests
               pytest
+              seaborn
             ]))
           ];
           shellHook = ''
