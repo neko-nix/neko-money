@@ -27,6 +27,7 @@
               requests
               pytest
               seaborn
+              tabulate
             ]))
           ];
           shellHook = ''
