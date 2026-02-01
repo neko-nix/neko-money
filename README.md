@@ -2,7 +2,7 @@
 ![Python](https://img.shields.io/badge/python-3.12+-orange?logo=python&logoColor=white) 
 ![NixOS](https://img.shields.io/badge/NixOS-blue?logo=nixos&logoColor=white&color=5277C3)
 ![SQLite](https://img.shields.io/badge/sqlite-%2307405e.svg?logo=sqlite&logoColor=white)
-![Version](https://img.shields.io/badge/version-1.0-brightgreen)
+![Version](https://img.shields.io/badge/version-2.0-brightgreen)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Last Commit](https://img.shields.io/github/last-commit/neko-nix/neko-money)
 ![GitHub commit activity](https://img.shields.io/github/commit-activity/m/neko-nix/neko-money)
