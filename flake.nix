@@ -18,7 +18,6 @@
             sqlite
             #sqlitebrowser
             #sqlite-web
-
             # Paquetes de Python
             python312
             (python312.withPackages (ps: with ps; [
@@ -28,6 +27,7 @@
               pytest
               seaborn
               tabulate
+              
             ]))
           ];
           shellHook = ''

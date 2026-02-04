@@ -4,6 +4,18 @@ from datetime import datetime, date, timedelta
 import sqlite3
 from src.utils.paths import DB_PATH
 
+def init_db():
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS cache_indicadores (
+            indicador TEXT PRIMARY KEY,
+            valor REAL,
+            last_update TIMESTAMP
+        )
+    """)
+    conn.commit()
+    conn.close()
 
 def get_db_value(indicador):
     conn = sqlite3.connect(DB_PATH)
@@ -49,5 +61,6 @@ def get_uf():
     return nuevo_valor
 
 if __name__ == "__main__":
-    print(f"Dólar: {get_usd()}")
-    print(f"UF: {get_uf()}")
+    init_db()
+    print(f"Dólar: ${get_usd():,.2f}")
+    print(f"UF:  {get_uf():,.2f}")
