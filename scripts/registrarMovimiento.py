@@ -35,7 +35,7 @@ def leer_dato(prompt, tipo_esperado=float, opciones=None, sugerencia=None):
 
 
 
-TICKERS_VALIDOS = ["AVUS", "AVUV", "AVDE", "AVDV", "AVEM"]
+TICKERS_VALIDOS = ["AVUS", "AVLV", "AVUV", "AVDE", "AVDV", "AVEM"]
 OPCIONES_VALIDAS = ["COMPRA", "VENTA"]
 
 
@@ -73,7 +73,7 @@ comisionUSD = leer_dato(f"Comisión total USD (${comisionEstimada:,.2f}): ", tip
 fechaUF = datetime.strptime(fecha, "%Y-%m-%d").strftime("%d-%m-%Y")
 url = f"https://mindicador.cl/api/uf/{fechaUF}"
 print(f"Consultado valor UF para la fecha {fecha}...")
-response = requests.get(url, timeout=5)
+response = requests.get(url, timeout=50)
 data = response.json()
 if "serie" in data and len(data["serie"]) > 0:
     valorUF = float(data["serie"][0]["valor"])

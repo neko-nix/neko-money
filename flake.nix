@@ -35,6 +35,8 @@
 
                       # Borrar los caches de python
                       find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null
+
+                      tree -v --dirsfirst -I "__pycache__|__init__.py|__main__.py|flake.lock|apuntes.md|estructura.md|CHANGELOG.md|README.md|LICENSE"
           '';        
         };
       });

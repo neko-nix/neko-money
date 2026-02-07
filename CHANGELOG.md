@@ -2,13 +2,15 @@
 ## 2026-02-xx
 ### Agregado
 - Toda la lógica de rebalanceo se hace ahora en [rebalancearAvantis.py](/src/core/rebalancearAvantis.py), donde se refactoriza el código para usar `pandas` en vez de listas de listas.
+
 ### Cambiado
 - Ahora los tickers a utilizar son:
-    - [AVUS](https://www.avantisinvestors.com/avantis-investments/avantis-us-equity-etf/) reemplazando a [ITOT](https://www.blackrock.com/cl/productos/239724/ishares-core-sp-total-us-stock-market-etf) y a [IUSV](https://www.blackrock.com/cl/productos/239715/ishares-russell-3000-value-etf),
+    - [AVUS](https://www.avantisinvestors.com/avantis-investments/avantis-us-equity-etf/) reemplazando a [ITOT](https://www.blackrock.com/cl/productos/239724/ishares-core-sp-total-us-stock-market-etf)
+    - [AVLV](https://www.avantisinvestors.com/avantis-investments/avantis-us-large-cap-value-etf/) reemplazando a [IUSV](https://www.blackrock.com/cl/productos/239715/ishares-russell-3000-value-etf),
     - [AVUV](https://www.avantisinvestors.com/avantis-investments/avantis-us-small-cap-value-etf/) reemplazando a [IJR](https://www.blackrock.com/cl/productos/239774/ishares-core-sp-smallcap-etf),
     - [AVDE](https://www.avantisinvestors.com/avantis-investments/avantis-international-equity-etf/) y [AVEM](https://www.avantisinvestors.com/avantis-investments/avantis-emerging-markets-equity-etf/) reemplazando a [IXUS](https://www.blackrock.com/cl/productos/244048/ishares-core-msci-total-international-stock-etf),
     - [AVDV](https://www.avantisinvestors.com/avantis-investments/avantis-international-small-cap-value-etf/) reemplazando a [SCZ](https://www.blackrock.com/cl/productos/239627/ishares-msci-eafe-smallcap-etf).
-
+- Se cambia la licencia MIT por la GNU GENERAL PUBLIC LICENSE V3
 
 ### Eliminado
 
