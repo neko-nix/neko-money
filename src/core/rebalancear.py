@@ -6,229 +6,214 @@ import yfinance as yf
 from src.utils import conversiones
 from src.utils.paths import DB_PATH, DATA_DIR
 import pandas as pd
+import numpy as np
+from tabulate import tabulate
+import time
 
 
 holdingsACWI = DATA_DIR+"datosACWI.csv"
 df = pd.read_csv(holdingsACWI, skiprows=9)
 
+
+paises_desarrollados_ex_us = [
+    'Japan', 'United Kingdom', 'France', 'Canada', 'Switzerland', 'Germany', 
+    'Australia', 'Netherlands', 'Denmark', 'Sweden', 'Spain', 'Hong Kong', 
+    'Italy', 'Singapore', 'Finland', 'Belgium', 'Norway', 'Israel', 'Ireland', 'Portugal'
+]
+
+paises_emergentes = [
+    'China', 'India', 'Taiwan', 'Korea (South)', 'Brazil', 'Saudi Arabia', 
+    'South Africa', 'Mexico', 'Thailand', 'Indonesia', 'Malaysia', 
+    'United Arab Emirates', 'Qatar', 'Kuwait', 'Turkey', 'Philippines', 
+    'Chile', 'Greece', 'Poland', 'Colombia', 'Peru', 'Egypt', 'Czech Republic'
+]
+
+
+proporcionDM = df[df['Location'].isin(paises_desarrollados_ex_us)]['Weight (%)'].sum() / 100
+proporcionEM = df[df['Location'].isin(paises_emergentes)]['Weight (%)'].sum() / 100
 proporcionUSA = (df[df['Location'] == 'United States']['Weight (%)'].sum()/100)
 
-proporcionesTickers = {
-    # Sector USA
-    "ITOT": proporcionUSA/3,
-    "IUSV": proporcionUSA/3,
-    "IJR": proporcionUSA/3,
-    # Sector Internacional
-    "IXUS": 1-proporcionUSA,
-    "SCZ": 0
-}
+totalGlobal = proporcionUSA + proporcionDM + proporcionEM
 
-print("Las proporciones objetivo son las siguientes:")
+# Normalizar porque no siempre da 1 justo
+proporcionUSA /= totalGlobal
+proporcionDM /= totalGlobal
+proporcionEM /= totalGlobal
 
-print(f"{'TICKER':<6} | {'PROP'}")
-print("=" * 17)
-for ticker, proporcion in proporcionesTickers.items():
-    print(f"{ticker:<6} | {proporcion*100:>6.2f} %")
-#tickersUSA = [["ITOT", 1/3],["IUSV",1/3],["IJR",1/3]]
-#tickersINT = [["IXUS", propIXUS], ["IVLU",propIVLU], ["ISVL", propISVL], ["EVLU", propEVLU ]]
+proporcionesTickers = [
+    ["AVUS", proporcionUSA/3],
+    ["AVLV", proporcionUSA/3],
+    ["AVUV", proporcionUSA/3],
+    ["AVDE", proporcionDM*2/3],
+    ["AVDV", proporcionDM/3],
+    ["AVEM", proporcionEM]
+]
+
+for ticker, prop in proporcionesTickers:
+    print(f"{ticker}, {prop:,.2%}")
+columnas = ["ticker", "proporción_ideal"]
+
+dfProporcionesIdeales = pd.DataFrame(proporcionesTickers, columns=columnas)
 
 
+# Creamos una versión formateada para mostrar
+tabla_porcentajes = [[t, f"{p:.2%}"] for t, p in proporcionesTickers]
+
+print(tabulate(tabla_porcentajes,
+               headers=["Ticker", "Prop Ideal"],
+               tablefmt="rounded_grid",
+               numalign='right',
+               stralign='right'))
 
     
 def calcular_proporciones():
     conn = sqlite3.connect(DB_PATH)
-    cursor = conn.cursor()
-    
-    cursor.execute("""
-        SELECT ticker, 
-               SUM(cantidad) as total_titulos, 
-               SUM(total_clp) as inversion_total_clp
-        FROM transacciones 
-        GROUP BY ticker
-    """)
-    mis_activos = cursor.fetchall()
-    totales = []
-
-    
-    total_cartera_clp = 0
-
-    #print(f"{'TICKER':<10} | {'CANT':<7} | {'PPA ':<15} | {'VALOR ACTUAL':<15} | {'DIFERENCIA %':<10}")
-    #print("-" * 65)
-
-    for i, (ticker, cant, inv_clp) in enumerate(mis_activos):
-
-        data = yf.Ticker(ticker)
-        precio_actual_usd = data.fast_info['last_price']
-
-        dolar = conversiones.get_usd()
-
-        precioUnitarioCLP = precio_actual_usd * dolar  
-        #print(f"$ {precioUnitarioCLP:,.0f}")
-        valor_actual_posicion_usd = cant * precio_actual_usd
-        valor_actual_clp = valor_actual_posicion_usd * dolar
-
-        totales.append([ticker,cant,inv_clp,valor_actual_clp,precioUnitarioCLP])
-
+    query = "SELECT ticker, SUM(cantidad) as cantidad, \
+            SUM(total_clp) as inversion_inicial_clp, \
+            SUM(total_usd) as inversion_inicial_usd  \
+            FROM transacciones GROUP BY ticker"
+    activos = pd.read_sql_query(query, conn)
     conn.close()
 
-    sumaFinal = 0
-    sumaInicial = 0
-    gananciaTotal = 0
+    # Inveriones inciales 
+    totalInicialCLP = activos['inversion_inicial_clp'].sum()
+    totalInicialUSD = activos['inversion_inicial_usd'].sum()
 
-    print(f"\n{'Ticker':<6} | {'Inv Inicial':<13} | {'Inv Final':<13} | {'Variación':<9}")
-    print("=" * 54)
+    # Valores actuales
 
-    for ticker, cantidad, invInicial, invActual, pua in totales:
-        sumaFinal = invActual + sumaFinal
-        sumaInicial = invInicial + sumaInicial
-        variacion = (invActual-invInicial)/invInicial
-
-        print(f"{ticker:<6} | $ {invInicial:>11,.0f} | $ {invActual:>11,.0f} | {variacion*100:>7.2f} %")
-    
-    gananciaTotal = (sumaFinal - sumaInicial) / sumaInicial
-    print("-" * 54)
-    print(f"{'TOTAL':<6} | $ {sumaInicial:>11,.0f} | $ {sumaFinal:>11,.0f} | {gananciaTotal*100:>7.2f} %")
-
-    print("")
-    print(f"Valor inicial de la cartera: {sumaInicial:>11,.0f} (100%)")
-    print(f"Valor actual de la cartera: {sumaFinal:>12,.0f} ({(1+gananciaTotal)*100:<1.2f}%)")
-    print(f"Variación de la cartera: {sumaFinal-sumaInicial:>15,.0f} ({gananciaTotal*100:.2f}%)")
-
-    print("")
-    #print("Las proporciones actuales son:")
-
-    # REBALANCEO
-
-    # Suma de lo que se agrega
-    nuevaSuma = 0
-    sumaSobrante = 0
-    residuoCompra = []
-    comprasTickers = []
-
-    # Esta es la inversión mínima que define el broker para tener las comisiones más favorables
-    # Esto puede variar con el tiempo, así que hay que estar atento a los cambios que se hagan.
-    invMinima = (0.12*1.19*conversiones.get_uf()/(0.595/100))
-    print(f"Inversión mínima para obtener las comisiones más favorables: ${invMinima:,.0f}")
-
-    cantidadInyectar = input(f"Ingrese el monto a inyectar (${invMinima:,.0f}):")
-    
-    if cantidadInyectar == "":
-        cantidadInyectar = invMinima
+    intentos = 0
+    lista_tickers = activos['ticker'].unique().tolist()
+    precios_actuales = None
+    while intentos < 3:
+        try:
+            precios_data = yf.download(lista_tickers, period="1d", progress=False)['Close']
+            precios_actuales = precios_data.iloc[-1] if len(precios_data.shape) > 1 else precios_data
+            if precios_actuales.isnull().any():
+                tickers_con_nan = precios_actuales[precios_actuales.isnull()].index.tolist()
+                print(f"Intento {intentos + 1}: NaN detectado en {tickers_con_nan}. Reintentando...")
+                intentos += 1
+                time.sleep(2)
+                continue
+            break
+        except Exception as e:
+            print(f"Error de conexión: {e}")
+            intentos += 1
+            time.sleep(2)
     else:
-        cantidadInyectar = int(cantidadInyectar)
-    print(f"Se van a inyectar ${cantidadInyectar:,.0f}\n")
+        raise Exception(f"No se pudieron obtener todos los precios después de {intentos} intentos. Inténtelo más tarde.")
 
-
-
-    #print(f"{'Ticker':<6} | {'Inv Actual':<13} | {'Prop Actual':<11} | {'Agregar':<12} | {'Precio Unitario':<15} | {'Comprar':>7} | {'Sobrante':>10}")
-    #print("=" * 100)
-
-    for ticker, cantidad, invInicial, invActual, pua in totales:
-        #if ticker != "SCZ":
-        propoActual = invActual/sumaFinal       
-
-        #print(f"{ticker} tiene ${invActual:,.0f}, y su proporción actual es {propoActual*100:.2f}%")
-
-        totalNuevo = sumaFinal + cantidadInyectar
-
-        invIdeal = proporcionesTickers[ticker]* totalNuevo
-        diferencia = invIdeal - invActual
-
-        if diferencia > 0:
-            nuevaSuma += diferencia
-
-            
-            spreadBroker = (pua*1.5)/100
-
-            cantidadComprarEstimada = (diferencia) / (pua+spreadBroker)
-            montoCompraEstimado = int(cantidadComprarEstimada) * (pua+spreadBroker)
-
-            comisionVariable = (montoCompraEstimado)*(0.595/100)
-
-            comision = max(comisionVariable, 0.12*1.19*conversiones.get_uf())
-
-            cantidadComprar = (diferencia - comision) / (pua+spreadBroker)
-            fraccionAccion = cantidadComprar - int(cantidadComprar)
-
-            if cantidadComprar < 1:                
-                dineroSobrante = diferencia
-                cantidadComprar = 0
-            else:                
-                dineroSobrante = fraccionAccion * (pua+spreadBroker)            
-
-            sumaSobrante += dineroSobrante
-
-            #residuoCompra.append([ticker,fraccionAccion])
-
-            
-
-            #print(f"{ticker:<6} | $ {invActual:>11,.0f} | {propoActual*100:>9.2f} % | $ {diferencia:>10,.0f} | $ {pua:>13,.0f} | {int(cantidadComprar):>7.0f} | $ {dineroSobrante:>8,.0f}")
-            #print(f"A {ticker} se deben agregar ${diferencia:,.0f} para alcanzar su proporción ideal ({propDict[ticker]*100:.2f}%)")
-            #print(f"{ticker} ahora tiene ${invActual+diferencia:,.0f} (Actual: ${invActual:,.0f} + Agregar: ${diferencia:,.0f})\n")
-
-        else:
-            diferencia = 0
-            cantidadComprar = 0
-            fraccionAccion = 0
-            #comprasTickers.append([ticker, int(cantidadComprar), fraccionAccion])
-            #print(f"{ticker:<6} | $ {invActual:>11,.0f} | {propoActual*100:>9.2f} % | $ {0:>10,.0f}")
-            #print(f"A {ticker} no hay que agregarle nada, porque está sobreponderado.")
-            #print(f"{ticker} se queda en ${invActual:,.0f}\n")
-
-        comprasTickers.append([ticker, cantidad, invInicial, invActual, pua, int(cantidadComprar), dineroSobrante, fraccionAccion, propoActual, diferencia])
-        print(f"Se van a comprar {int(cantidadComprar)} de {ticker}")
 
     
-    sobraron = cantidadInyectar-nuevaSuma+sumaSobrante
+    #precios_data = yf.download(lista_tickers, period="1d", progress=False)['Close']
+    #print(precios_data)
+    #precios_actuales = precios_data.iloc[-1]
 
-
-    print(f"\nSobraron inicialmente: ${sobraron:,.0f}\n")
-    #print(f"Sobró por discretización ${sumaSobrante:,.0f}")
-
+    activos['precio_actual_usd'] = activos['ticker'].map(precios_actuales)
+    activos['precio_actual_usd'] = activos['precio_actual_usd'].fillna(1)
+    activos['inversion_actual_usd'] = activos['precio_actual_usd'] * activos['cantidad']
     
-    comprasTickers.sort(key=lambda x: x[7], reverse=True) 
 
-    # Sólo se consideran los tickers que sí se iban a comprar, esto para evitar gastar más en comprar 1 sólo ticker
-    # y pagando comisiones extra
-    candidatos = [c for c in comprasTickers if c[5] > 0]
+    totalActualUSD = activos['inversion_actual_usd'].sum()
 
-    for i in range(len(comprasTickers)):
-        if comprasTickers[i][5] > 0:
-            pua = comprasTickers[i][4]
-            spread = (pua * 1.5) / 100
-            costo_unidad = pua + spread
+    dolarObservado = conversiones.get_usd()
+    totalActualCLP = activos['inversion_actual_usd'].sum()*dolarObservado
 
-            # Para este cálculo sólo se considera comisión variable, porque se va a hacer una sóla compra del ticker
-            # Y si la comisión fija ya se pagó antes, entonces sólo se paga la variable
-            while sobraron >= (costo_unidad * 1.01):
-                comprasTickers[i][5] += 1
-                sobraron -= costo_unidad
-                print(f"Con lo que sobró se va a agregar 1 {comprasTickers[i][0]}, para un total de {comprasTickers[i][5]}")
+    # Porcentajes
+    activos['porcentaje_actual'] = activos["inversion_actual_usd"]/totalActualUSD
+    activos = pd.merge(activos,dfProporcionesIdeales, on="ticker", how="outer").fillna(0)
 
-                break
+    # Montos a invertir
+    comisionBroker = max((dolarObservado*0.49)/100, 5)
+    dolarBroker = comisionBroker + dolarObservado
+    #montoInvertirUSD = montoInvertirCLP/(dolarObservado+comisionBroker)
 
-    print("")
-    print(f"{'Ticker':<6} | {'Inv Actual':<13} | {'Prop Actual':<11} | {'Agregar':<12} | {'Precio Unitario':<15} | {'Comprar':<7} | {'Inv Nueva':<12} | {'Prop Nueva':<11} | {'Prop Ideal':<10}")
-    print("=" * 121)
+    while True:
+        montoInvertirUSD = input("Ingrese monto a invertir en USD: ").strip()
+        try:
+            montoInvertirUSD = float(montoInvertirUSD)
+            if montoInvertirUSD < 0:
+                print("El monto no puede ser negativo.")
+                continue
+            break
+        except ValueError:
+            print(f"'{montoInvertirUSD}' no es un número válido. Inténtelo de nuevo.")
+    
+    print(f"Se van a invertir: ${montoInvertirUSD:,.2f}")
 
+    montoInvertirCLP = montoInvertirUSD*(dolarObservado-comisionBroker)
 
-    for ticker, cantidad, invInicial, invActual, pua, cantidadComprar, dineroSobrante, fraccionAccion, propoActual, diferencia in comprasTickers:
-        spreadBroker = (pua*0.6)/100
-        if int(cantidadComprar) > 0:
-            invNuevaEstimada = int(cantidadComprar)*(pua+spreadBroker) + invInicial
-        else:
-            invNuevaEstimada = invActual
+    comisionPagada = montoInvertirUSD*comisionBroker
+    proporcionComision = (dolarBroker-dolarObservado)/dolarObservado
 
-        propNuevaEstimada = invNuevaEstimada / (sumaFinal+cantidadInyectar-sobraron)
-        print(f"{ticker:<6} | $ {invActual:>11,.0f} | {propoActual*100:>9.2f} % | $ {diferencia:>10,.0f} | $ {pua:>13,.0f} | {int(cantidadComprar):>7.0f} | ${invNuevaEstimada:>11,.0f} | {propNuevaEstimada*100:>9.2f} % | {proporcionesTickers[ticker]*100:.2f} %")
+    print(f"Precio Dólar Mercado: ${dolarObservado:,.2f}")
+    print(f"Precio Dólar Broker: ${dolarObservado+comisionBroker:,.2f}")   
 
-
-    print(f"\nInversión total nueva estimada: ${sumaFinal+cantidadInyectar-sobraron:,.0f}")
-    print(f"\nSobró ${sobraron:.0f}")
-
-    print("\nNOTA: Aunque un ticker esté sobreponderado, se calcula lo que se debe inyectar considerando TODOS LO QUE SE SUME A LOS OTROS TICKERS.")
+    print(f"Se van a inyectar ${montoInvertirUSD:,.2f} USD, ${montoInvertirCLP:,.0f} CLP")
+    print(f"Comisión total pagada por cambio de divisa: ${comisionPagada:,.2f} CLP, ${comisionPagada/dolarObservado:,.2f} USD")
 
 
+    # Inversión ideal
+    activos['inversion_ideal'] = (totalActualUSD+montoInvertirUSD)*activos['proporción_ideal']
+    activos['inversion_ideal'] = activos['inversion_ideal'] - activos['inversion_actual_usd']
+    activos['inversion_ideal'] = activos['inversion_ideal'].clip(lower=0)
 
+    activos['prop_invertir'] = activos['inversion_ideal'] / activos['inversion_ideal'].sum()
+
+    # Esto se hace para que el monto a invertir coincida con la plata que vamos a inyectar de verdad
+    activos['monto_invertir'] = montoInvertirUSD*activos['prop_invertir']
+    activos['comisión_pagada'] = activos['monto_invertir']*proporcionComision
+
+    #activos['cantidad_comprar'] = activos['monto_invertir']/activos["precio_actual_usd"]
+
+    # Cantidades nuevas estimadas
+    activos['inversión_nueva'] = activos['inversion_actual_usd']+activos['monto_invertir']
+    activos['proporción_nueva'] = activos['inversión_nueva'] / activos['inversión_nueva'].sum()
+
+    totales = ['inversion_actual_usd', 'porcentaje_actual', 'monto_invertir', 'comisión_pagada', 'inversión_nueva', 'proporción_nueva', 'proporción_ideal']
+
+    activos.loc['TOTAL', totales] = activos[totales].sum()
+    activos.loc['TOTAL', 'ticker'] = 'TOTAL'
+    activos.loc['TOTAL'] = activos.loc['TOTAL'].fillna(0)
+
+    activos['inversion_actual_usd']= activos['inversion_actual_usd'].map("$ {:,.2f}".format)
+    activos['inversión_nueva']= activos['inversión_nueva'].map("$ {:,.2f}".format)
+    activos['porcentaje_actual']= activos['porcentaje_actual'].map("{:,.2%}".format)
+    activos['proporción_nueva']= activos['proporción_nueva'].map("{:,.2%}".format)
+    activos['proporción_ideal']= activos['proporción_ideal'].map("{:,.2%}".format)
+    activos['monto_invertir']= activos['monto_invertir'].map("$ {:,.2f}".format)
+    activos['comisión_pagada']= activos['comisión_pagada'].map("$ {:,.2f}".format)
+
+
+    orden_deseado = ["AVUS", "AVLV", "AVUV", "AVDE", "AVDV", "AVEM", "TOTAL"]
+
+    activos['ticker'] = pd.Categorical(activos['ticker'], categories=orden_deseado, ordered=True)
+
+    activos = activos.sort_values('ticker')
+
+
+    print(tabulate(
+        activos[['ticker',
+                'inversion_actual_usd',
+                'porcentaje_actual',
+                'monto_invertir',
+                'comisión_pagada',
+                'inversión_nueva',
+                'proporción_nueva',
+                'proporción_ideal']],
+        headers=['Ticker',
+                 'Total Actual',
+                 'Prop Actual',
+                 'Monto Invertir',
+                 'Comisión',
+                 'Total Nuevo',
+                 'Prop Nueva',
+                 'Prop Ideal'], 
+        tablefmt='rounded_grid',
+        numalign='right',
+        stralign='right',
+        showindex=False
+    ))
+
+  
 calcular_proporciones()
 
