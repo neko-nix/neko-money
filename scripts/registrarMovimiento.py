@@ -35,7 +35,10 @@ def leer_dato(prompt, tipo_esperado=float, opciones=None, sugerencia=None):
 
 
 
-TICKERS_VALIDOS = ["AVUS", "AVLV", "AVUV", "AVDE", "AVDV", "AVEM"]
+TICKERS_VALIDOS = [ "IAUM", "SLV", "IBIT", "ETHA", "PDBC",  # Metales y Crypto
+                    "AVUS", "AVLV", "AVUV", "AVDE", "AVDV", "DFIV", "AVEM", "AVES", # ETFs Avantis/DFA
+                    "TLT"] # Para el Yield
+
 OPCIONES_VALIDAS = ["COMPRA", "VENTA"]
 
 
@@ -43,6 +46,9 @@ ticker   = leer_dato(f"Ticker ({', '.join(TICKERS_VALIDOS)}): ", opciones=TICKER
 tipo     = leer_dato("¿Compra o Venta?: ", opciones=OPCIONES_VALIDAS)
 fecha    = input(f"Fecha AAAA-MM-DD ({datetime.now().date()}): ") or str(datetime.now().date())
 totalUSD = leer_dato("Monto invertido (USD): ", tipo_esperado=float)
+
+if tipo == "VENTA":
+    totalUSD *= -1
 
 precioUSD   = leer_dato("Precio unitario (USD): ", tipo_esperado=float)
 cantidad = totalUSD/precioUSD
@@ -83,6 +89,8 @@ else:
 mensajeUF = f"Valor UF ({valorUF})" if valorUF else "Valor UF: "
 uf = leer_dato(f"{mensajeUF}: ", tipo_esperado=float, sugerencia=valorUF)
 
+# uf = 39716.32
+# print(f"Valor Uf: {uf}")
 
 # Valores equivalentes:
 precioCLP   = precioUSD*dolar
@@ -102,21 +110,23 @@ print(f"Ticker: {ticker}")
 print(f"Tipo: {tipo}")
 print(f"Fecha: {fecha}")
 print(f"Cantidad: {cantidad}")
+print(f"Dólar Observado: ${dolar}")
+print(f"Precio por acción (USD): ${precioUSD}")
+print(f"Comisión (USD): ${comisionUSD}")
+print(f"Total Invertido (USD): ${totalUSD}")
+
+print(f"{'-'*40}")
+print("Equivalente en Pesos Chilenos")
+print(f"{'-'*40}")
+
 print(f"Precio por acción (CLP): ${precioCLP}")
 print(f"Comisión (CLP): ${comisionCLP}")
 print(f"Total Invertido (CLP): ${totalCLP}")
 
 print(f"{'-'*40}")
-print("Equivalente en Dólares Estadounidenses")
-print(f"{'-'*40}")
-print(f"Dólar Observado: ${dolar}")
-print(f"Preciopor acción (USD): ${precioUSD}")
-print(f"Comisión (USD): ${comisionUSD}")
-print(f"Total Invertido (USD): ${totalUSD}")
-
-print(f"{'-'*40}")
 print("Equivalente en Unidad de Fomento")
 print(f"{'-'*40}")
+
 print(f"Valor UF: UF{uf}")
 print(f"Precio por acción (UF): UF{precioUF}")
 print(f"Comisión (UF): UF{comisionUF}")
