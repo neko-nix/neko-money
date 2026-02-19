@@ -1,8 +1,14 @@
 #[V3.0]
-## 2026-02-07
+## 2026-02-18
 ### Agregado
+- Se escribe documentación básica explicando la estrategia de inversión.
+- Nuevos utils:
+    - [acciones.py](/src/utils/acciones.py): Calcula las proporciones de los ETFs de acciones manteniendo la neutralidad geográfica según el ACWI.
+    - [portafolio.py](/src/utils/portafolio.py): Obtiene los valores actuales de los activos, usando los datos de la base de datos con el último precio del mercado.
+    - [demonios.py](/src/utils/demonios.py): Calcula la proporción de cada demonio según ciertas reglas definidas.
 ### Cambiado
-### Eliminado
+- Rebalanceo ahora incluye los demonios.
+
 
 #[V2.0]
 ## 2026-02-08
