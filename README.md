@@ -2,7 +2,7 @@
 ![Python](https://img.shields.io/badge/python-3.12+-orange?logo=python&logoColor=white) 
 ![NixOS](https://img.shields.io/badge/NixOS-blue?logo=nixos&logoColor=white&color=5277C3)
 ![SQLite](https://img.shields.io/badge/sqlite-%2307405e.svg?logo=sqlite&logoColor=white)
-![Version](https://img.shields.io/badge/version-2.0-brightgreen)
+![Version](https://img.shields.io/badge/version-3.0-brightgreen)
 [![License: GPL v3](https://img.shields.io/badge/license-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 ![Last Commit](https://img.shields.io/github/last-commit/neko-nix/neko-money)
 ![GitHub commit activity](https://img.shields.io/github/commit-activity/m/neko-nix/neko-money)
@@ -10,14 +10,14 @@
 
 Sistema personal de seguimiento de inversiones en ETFs automático, utilizando las APIs de [Yahoo Finance](https://ranaroussi.github.io/yfinance/index.html), [Mindicador.cl](https://mindicador.cl/) y SQLite, optimizado para el mercado chileno y desarrollado sobre NixOS.
 
-## Features Actuales
+## Funciones Actuales:
 - **Gestión de Movimientos:** Registro en SQLite de compras, ventas y comisiones de cada transacción en CLP, y cálculo automático de equivalentes en USD y UF.
 - **Valor Actual de Inversión:** Cálculo de ganancias/pérdidas del portafolio invertido a la fecha actual.
 - **Entorno Nix:** Ambiente de desarrollo reproducible mediante [flake.nix](/flake.nix) sin tener que depender de documentos tipo `requierements.txt`.
 - **Rebalanceo de Activos:** Lógica de flujo de caja basada en el índice MSCI ACWI.
-
-## Roadmap (Próximos Pasos)
 - **Documentación de Estrategia de Inversión**: Documentar y explicar la estrategia de inversión.
+
+## Funciones Planeadas:
 - **Análisis Visual:** Generar gráficos de distintos tipos para analizar visualmente el comportamiento del portafolio.
 - **Análisis de Componentes:** Scrapping de los componentes internos de cada ETF, y generar un análisis detallado de las posiciones, geografía, industrias, etc, del portafolio.
 - **Notificaciones Telegram:** Enviar resúmenes diarios, semanales, mensuales y/o anuales del comportamiento del portafolio.

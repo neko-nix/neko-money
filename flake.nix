@@ -3,6 +3,7 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.11";
+    #nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";
   };
   outputs = { self, nixpkgs, flake-utils }:
@@ -21,7 +22,8 @@
             # Paquetes de Python
             python312
             (python312.withPackages (ps: with ps; [
-              pandas numpy matplotlib
+              pandas #pandas-datareader
+              numpy matplotlib
               yfinance plotly
               requests
               pytest

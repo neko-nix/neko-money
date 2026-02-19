@@ -1,3 +1,9 @@
+#[V3.0]
+## 2026-02-07
+### Agregado
+### Cambiado
+### Eliminado
+
 #[V2.0]
 ## 2026-02-08
 ### Cambiado
