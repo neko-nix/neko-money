@@ -8,8 +8,8 @@ from pathlib import Path
 ROOT_DIR = Path(__file__).resolve().parent.parent.parent
 
 # Definimos las rutas importantes
-DATA_DIR = ROOT_DIR / "data"
-DB_PATH = DATA_DIR / "nekoMoney.db"
+DATA_DIR = str(ROOT_DIR)+"/data/"
+DB_PATH = str(DATA_DIR)+"/nekoMoney.db"
 
 # Tip pro: Asegurémonos de que la carpeta data existe para que no explote
 def inicializar_carpetas():

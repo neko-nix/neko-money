@@ -34,16 +34,26 @@ def leer_dato(prompt, tipo_esperado=float, opciones=None, sugerencia=None):
 
 
 
-TICKERS_VALIDOS = ["ITOT", "IUSV", "IJR", "IXUS", "SCZ"]
+
+TICKERS_VALIDOS = [ "IAUM", "SLV", "IBIT", "ETHA", "PDBC",  # Metales y Crypto
+                    "AVUS", "AVLV", "AVUV", "AVDE", "AVDV", "DFIV", "AVEM", "AVES", # ETFs Avantis/DFA
+                    "TLT"] # Para el Yield
+
 OPCIONES_VALIDAS = ["COMPRA", "VENTA"]
 
 
 ticker   = leer_dato(f"Ticker ({', '.join(TICKERS_VALIDOS)}): ", opciones=TICKERS_VALIDOS)
 tipo     = leer_dato("¿Compra o Venta?: ", opciones=OPCIONES_VALIDAS)
 fecha    = input(f"Fecha AAAA-MM-DD ({datetime.now().date()}): ") or str(datetime.now().date())
-cantidad = leer_dato("Cantidad de acciones: ", tipo_esperado=int)
-precio   = leer_dato("Precio unitario (CLP): ", tipo_esperado=float)
-comision = leer_dato("Comisión total (CLP): ", tipo_esperado=float)
+totalUSD = leer_dato("Monto invertido (USD): ", tipo_esperado=float)
+
+if tipo == "VENTA":
+    totalUSD *= -1
+
+precioUSD   = leer_dato("Precio unitario (USD): ", tipo_esperado=float)
+cantidad = totalUSD/precioUSD
+
+
 
 # Obtener el valor del dólar
 dolarObservado = None
@@ -59,13 +69,17 @@ else:
 
 mensajeDolar = f"Dólar Observado ({dolarObservado}): " if dolarObservado else "Dólar Observado: "
 dolar = leer_dato(mensajeDolar, tipo_esperado=float, sugerencia=dolarObservado)
+dolarBroker = dolar + max(dolar*0.49/100, 5)
 
+comisionProporcional = (dolarBroker-dolar)/dolar
+comisionEstimada = totalUSD*comisionProporcional
+comisionUSD = leer_dato(f"Comisión total USD (${comisionEstimada:,.2f}): ", tipo_esperado=float, sugerencia=comisionEstimada)
 
 # Obtener el valor de la UF
 fechaUF = datetime.strptime(fecha, "%Y-%m-%d").strftime("%d-%m-%Y")
 url = f"https://mindicador.cl/api/uf/{fechaUF}"
 print(f"Consultado valor UF para la fecha {fecha}...")
-response = requests.get(url, timeout=5)
+response = requests.get(url, timeout=50)
 data = response.json()
 if "serie" in data and len(data["serie"]) > 0:
     valorUF = float(data["serie"][0]["valor"])
@@ -75,18 +89,18 @@ else:
 mensajeUF = f"Valor UF ({valorUF})" if valorUF else "Valor UF: "
 uf = leer_dato(f"{mensajeUF}: ", tipo_esperado=float, sugerencia=valorUF)
 
+# uf = 39716.32
+# print(f"Valor Uf: {uf}")
 
 # Valores equivalentes:
-precioUSD   = round(precio / dolar,2)
-comisionUSD = round(comision / dolar,2)
+precioCLP   = precioUSD*dolar
+comisionCLP = comisionUSD*dolar
 
-precioUF   = round(precio / uf,4)
-comisionUF = round(comision / uf,4)
+precioUF   = precioCLP/uf
+comisionUF = comisionCLP/uf
 
-totalCLP = (cantidad * precio) + comision
-totalUSD = round(totalCLP / dolar,2)
-totalUF  = round(totalCLP / uf,2)
-
+totalCLP = totalUSD*dolar
+totalUF  = totalCLP/uf
 
 
 print(f"\n{'='*40}")
@@ -96,21 +110,23 @@ print(f"Ticker: {ticker}")
 print(f"Tipo: {tipo}")
 print(f"Fecha: {fecha}")
 print(f"Cantidad: {cantidad}")
-print(f"Precio por acción (CLP): ${precio}")
-print(f"Comisión (CLP): ${comision}")
-print(f"Total Invertido (CLP): ${totalCLP}")
-
-print(f"{'-'*40}")
-print("Equivalente en Dólares Estadounidenses")
-print(f"{'-'*40}")
 print(f"Dólar Observado: ${dolar}")
-print(f"Preciopor acción (USD): ${precioUSD}")
+print(f"Precio por acción (USD): ${precioUSD}")
 print(f"Comisión (USD): ${comisionUSD}")
 print(f"Total Invertido (USD): ${totalUSD}")
 
 print(f"{'-'*40}")
+print("Equivalente en Pesos Chilenos")
+print(f"{'-'*40}")
+
+print(f"Precio por acción (CLP): ${precioCLP}")
+print(f"Comisión (CLP): ${comisionCLP}")
+print(f"Total Invertido (CLP): ${totalCLP}")
+
+print(f"{'-'*40}")
 print("Equivalente en Unidad de Fomento")
 print(f"{'-'*40}")
+
 print(f"Valor UF: UF{uf}")
 print(f"Precio por acción (UF): UF{precioUF}")
 print(f"Comisión (UF): UF{comisionUF}")
@@ -142,8 +158,8 @@ if confirmar == 's':
             tipo.lower(),
             fecha,
             cantidad,
-            precio,
-            comision,
+            precioCLP,
+            comisionCLP,
             totalCLP,
             dolar,
             precioUSD,
@@ -180,7 +196,7 @@ if confirmar == 's':
                     elif "uf" in columnas[i]:
                         print(f"{columnas[i]:<25}: UF {valor_espaciado:>14}")
                     elif "cantidad" in columnas[i]:
-                        print(f"{columnas[i]:<25}: {valor:>17,.0f}")
+                        print(f"{columnas[i]:<25}: {valor_espaciado:>17}")
                 else:
                     print(f"{columnas[i]:<25}: {valor:>17}")            
             print(f"{'='*40}")
