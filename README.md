@@ -18,12 +18,13 @@ Sistema personal de seguimiento de inversiones en ETFs automático, utilizando l
 - **Documentación de Estrategia de Inversión**: Documentar y explicar la estrategia de inversión.
 
 ## Funciones Planeadas:
+- **Históricos:** Guardar datos históricos del portafolio, para poder hacer análisis en el tiempo.
 - **Análisis Visual:** Generar gráficos de distintos tipos para analizar visualmente el comportamiento del portafolio.
 - **Análisis de Componentes:** Scrapping de los componentes internos de cada ETF, y generar un análisis detallado de las posiciones, geografía, industrias, etc, del portafolio.
-- **Notificaciones Telegram:** Enviar resúmenes diarios, semanales, mensuales y/o anuales del comportamiento del portafolio.
-- **Históricos:** Guardar datos históricos del portafolio, para poder hacer análisis en el tiempo.
 - **Proyecciones:** Implementar distintos tipos de proyecciones para el portafolio.
 - **Comparaciones:** Comparar los resultados del portafolio con otros utilizados comúnmente, y ver sus diferencias.
+- **Notificaciones Telegram:** Enviar resúmenes diarios, semanales, mensuales y/o anuales del comportamiento del portafolio.
+
 
 Todos los cambios se encuentran en [CHANGELOG](/CHANGELOG.md)
 
@@ -37,7 +38,8 @@ nix develop
 ```text
 ├── data                            # Base de datos, no versionada
 │   └── nekoMoney.db                
-├── docs
+├── docs                            # Documentación
+│   └── documentation.md
 ├── scripts                         # Scripts de automatización
 │   └── registrarMovimiento.py
 ├── src                             # Núcleo del programa
@@ -47,9 +49,12 @@ nix develop
 │   ├── database                    # Gestión de base de datos
 │   │   └── crearDB.py
 │   └── utils                       # Herramientas y rutas dinámicas
+│       ├── acciones.py
 │       ├── conversiones.py
+│       ├── demonios.py
 │       ├── etfData.py
-│       └── paths.py
+│       ├── paths.py
+│       └── portafolio.py
 ├── tests                           # Validación de cálculos
 └── flake.nix                       # Entorno NixOS reproducible
 ```

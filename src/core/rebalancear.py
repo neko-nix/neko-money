@@ -171,7 +171,7 @@ activos['monto_vender']  = np.where(activos['inversion_ideal'] - activos['totalU
 
 
 
-#print(f"\nANTES DEL FILTRO")
+print(f"\nANTES DEL FILTRO")
 #orden_deseado = ["AVUS", "AVLV", "AVUV", "AVDE", "DFIV", "AVDV", "AVEM", "AVES", "TOTAL"]
 orden_deseado = ["AVUS", "AVLV", "AVUV", "AVDE", "DFIV", "AVDV", "AVEM", "AVES", "TLT", "IAUM", "SLV", "IBIT", "ETHA", "PDBC"]
 activos['ticker'] = pd.Categorical(activos['ticker'], categories=orden_deseado, ordered=True)
@@ -193,75 +193,75 @@ print(f"Total Comprar: ${totalComprar:>9,.2f}\nTotal Vender:  ${totalVender:>9,.
 
 
 
-# activos['monto_comprar'] = np.where(activos['variacionProporcion'].abs() > TOLERANCIA, activos['monto_comprar'], 0)
-# activos['monto_vender']  = np.where(activos['variacionProporcion'].abs() > TOLERANCIA, activos['monto_vender'],  0)
+activos['monto_comprar'] = np.where(activos['variacionProporcion'].abs() > TOLERANCIA, activos['monto_comprar'], 0)
+activos['monto_vender']  = np.where(activos['variacionProporcion'].abs() > TOLERANCIA, activos['monto_vender'],  0)
 
-# print(f"DESPUÉS DEL FILTRO")
-# for index, row in activos.iterrows():
-#     # Usamos el Ticker (asumiendo que es el index o una columna)
-#     ticker = row['ticker'] # O index si el ticker es el índice del DF
+print(f"DESPUÉS DEL FILTRO")
+for index, row in activos.iterrows():
+    # Usamos el Ticker (asumiendo que es el index o una columna)
+    ticker = row['ticker'] # O index si el ticker es el índice del DF
     
-#     if row['monto_comprar'] > 0:
-#         print(f"{ticker: <4} | 🟢 COMPRAR:  ${row['monto_comprar']:>9,.2f}")
+    if row['monto_comprar'] > 0:
+        print(f"{ticker: <4} | 🟢 COMPRAR:  ${row['monto_comprar']:>9,.2f}")
         
-#     elif row['monto_vender'] < 0:
-#         print(f"{ticker: <4} | 🔴 VENDER:   ${row['monto_vender']:>9,.2f}")
-#     else:
-#         print(f"{ticker: <4} | 🟡 MANTENER: ${row['monto_vender']:>9,.2f}")
+    elif row['monto_vender'] < 0:
+        print(f"{ticker: <4} | 🔴 VENDER:   ${row['monto_vender']:>9,.2f}")
+    else:
+        print(f"{ticker: <4} | 🟡 MANTENER: ${row['monto_vender']:>9,.2f}")
 
 
-# totalComprarFiltrado = activos['monto_comprar'].sum()
-# totalVenderFiltrado = activos['monto_vender'].sum()
-# print(f"Total Comprar: ${totalComprarFiltrado:>9,.2f}\nTotal Vender:  ${totalVenderFiltrado:>9,.2f}\n")
+totalComprarFiltrado = activos['monto_comprar'].sum()
+totalVenderFiltrado = activos['monto_vender'].sum()
+print(f"Total Comprar: ${totalComprarFiltrado:>9,.2f}\nTotal Vender:  ${totalVenderFiltrado:>9,.2f}\n")
 
-# print(f"DESPUÉS DEL AJUSTE")
+print(f"DESPUÉS DEL AJUSTE")
 
-# comprasMax = abs(totalVenderFiltrado) + montoInvertirUSD
+comprasMax = abs(totalVenderFiltrado) + montoInvertirUSD
 
-# print(f"Compras máximas permitdas: ${comprasMax:,.2f}")
-# activos['proporcionCompras'] = activos['monto_comprar'] / totalComprarFiltrado
-# activos['monto_comprar'] = comprasMax * activos['proporcionCompras']
+print(f"Compras máximas permitdas: ${comprasMax:,.2f}")
+activos['proporcionCompras'] = activos['monto_comprar'] / totalComprarFiltrado
+activos['monto_comprar'] = comprasMax * activos['proporcionCompras']
 
-# totalComprarAjustado = activos['monto_comprar'].sum()
-# totalVenderAjustado  = activos['monto_vender'].sum()
-# print(f"Total Comprar: ${totalComprarAjustado:>9,.2f}\nTotal Vender:  ${totalVenderAjustado:>9,.2f}\n")
+totalComprarAjustado = activos['monto_comprar'].sum()
+totalVenderAjustado  = activos['monto_vender'].sum()
+print(f"Total Comprar: ${totalComprarAjustado:>9,.2f}\nTotal Vender:  ${totalVenderAjustado:>9,.2f}\n")
 
-# for index, row in activos.iterrows():
-#     # Usamos el Ticker (asumiendo que es el index o una columna)
-#     ticker = row['ticker'] # O index si el ticker es el índice del DF
+for index, row in activos.iterrows():
+    # Usamos el Ticker (asumiendo que es el index o una columna)
+    ticker = row['ticker'] # O index si el ticker es el índice del DF
     
-#     if row['monto_comprar'] > 0:
-#         print(f"{ticker: <4} | 🟢 COMPRAR:  ${row['monto_comprar']:>9,.2f}")
+    if row['monto_comprar'] > 0:
+        print(f"{ticker: <4} | 🟢 COMPRAR:  ${row['monto_comprar']:>9,.2f}")
         
-#     elif row['monto_vender'] < 0:
-#         print(f"{ticker: <4} | 🔴 VENDER:   ${row['monto_vender']:>9,.2f}")
-#     else:
-#         print(f"{ticker: <4} | 🟡 MANTENER: ${row['monto_vender']:>9,.2f}")
+    elif row['monto_vender'] < 0:
+        print(f"{ticker: <4} | 🔴 VENDER:   ${row['monto_vender']:>9,.2f}")
+    else:
+        print(f"{ticker: <4} | 🟡 MANTENER: ${row['monto_vender']:>9,.2f}")
 
 
 
-# if totalComprarFiltrado < abs(totalVenderFiltrado):
+if totalComprarFiltrado < abs(totalVenderFiltrado):
 
-#     print("Las compras son más grandes que las ventas + monto a inyectar.")
-#     print("Recalculando compras...")
-#     comprasMax = abs(totalVenderFiltrado) + montoInvertirUSD
+    print("Las compras son más grandes que las ventas + monto a inyectar.")
+    print("Recalculando compras...")
+    comprasMax = abs(totalVenderFiltrado) + montoInvertirUSD
 
-#     print(f"Compras máximas permitdas: ${comprasMax:,.2f}")
-#     activos['proporcionCompras'] = activos['monto_comprar'] / totalComprarFiltrado
-#     activos['monto_comprar'] *= activos['proporcionCompras']
+    print(f"Compras máximas permitdas: ${comprasMax:,.2f}")
+    activos['proporcionCompras'] = activos['monto_comprar'] / totalComprarFiltrado
+    activos['monto_comprar'] *= activos['proporcionCompras']
 
-#     print(f"DESPUÉS DEL RECÁLCULO")
-#     for index, row in activos.iterrows():
-#         # Usamos el Ticker (asumiendo que es el index o una columna)
-#         ticker = row['ticker'] # O index si el ticker es el índice del DF
+    print(f"DESPUÉS DEL RECÁLCULO")
+    for index, row in activos.iterrows():
+        # Usamos el Ticker (asumiendo que es el index o una columna)
+        ticker = row['ticker'] # O index si el ticker es el índice del DF
         
-#         if row['monto_comprar'] > 0:
-#             print(f"{ticker: <6} | COMPRAR:  ${row['monto_comprar']:>9,.2f}")
+        if row['monto_comprar'] > 0:
+            print(f"{ticker: <6} | COMPRAR:  ${row['monto_comprar']:>9,.2f}")
             
-#         elif row['monto_vender'] < 0:
-#             print(f"{ticker: <6} | VENDER:   ${row['monto_vender']:>9,.2f}")
-#         else:
-#             print(f"{ticker: <6} | MANTENER: ${row['monto_vender']:>9,.2f}")
+        elif row['monto_vender'] < 0:
+            print(f"{ticker: <6} | VENDER:   ${row['monto_vender']:>9,.2f}")
+        else:
+            print(f"{ticker: <6} | MANTENER: ${row['monto_vender']:>9,.2f}")
 
 
 

@@ -1,5 +1,5 @@
 #[V3.0]
-## 2026-02-18
+## 2026-02-21
 ### Agregado
 - Se escribe documentación básica explicando la estrategia de inversión.
 - Nuevos utils:
